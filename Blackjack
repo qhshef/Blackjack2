@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.Random;
 public class BlackJack{  
   public static void main(String[] args){       
     Scanner in = new Scanner(System.in);
@@ -20,53 +19,61 @@ public class BlackJack{
     //player's basic money
     
     while(p1.money>0 && computer.money>0){       
-      System.out.println(p1.name+" has $"+p1.money);     
+      System.out.println(p1.name+" has $"+p1.money);  
+      System.out.println(computer.name+" has $"+computer.money);
       System.out.println(p1.name + ", How much will you bet?");
       int b = in.nextInt();    
-      if(b <= p1.money || b > 0){
-        System.out.println(p1.name+" bet $"+b);
-        System.out.println("");
-        
+      if(b <= p1.money && b > 0 && b <= computer.money){
+        p1.betMoney = b;
+        System.out.println(p1.name+" bet $"+p1.betMoney);
+        System.out.println("");       
       }      
       while(b > p1.money || b <= 0){
         System.out.println("Please bet less than $"+p1.money+" or more than $0");
         b = in.nextInt(); 
-        if(b <= p1.money){
-          System.out.println(p1.name+" bet $"+b);
-          System.out.println("");
-          
-        }
-        if(b > computer.money){
-          System.out.println("Please bet less than $"+computer.money);
+        if(b <= p1.money || b > 0){
+          p1.betMoney = b;
+          System.out.println(p1.name+" bet $"+p1.betMoney);
+          System.out.println("");         
         }
       }  
+      while(b > computer.money){
+        System.out.println("Please bet less than $"+computer.money);
+        b = in.nextInt(); 
+        if(b <= p1.money || b > 0){
+          p1.betMoney = b;
+          System.out.println(p1.name+" bet $"+p1.betMoney);
+          System.out.println("");          
+        }
+      }
+      
       //player's bet
       
-      int s_total = play_human(p1);
+      int s_total = play_human(p1,computer);
       int computer_total = play_computer();
       calculate_winner(s_total, computer_total, p1);    
       //play game
       
       if(s_total<=21 && computer_total<s_total){
-        p1.money = p1.money+b;
-        computer.money = computer.money-b;
-        System.out.println(p1.name+" got $"+b);
-        System.out.println("Computer loses $"+b);
+        p1.money = p1.money+p1.betMoney;
+        computer.money = computer.money-p1.betMoney;
+        System.out.println(p1.name+" got $"+p1.betMoney);
+        System.out.println("Computer loses $"+p1.betMoney);
         System.out.println("");
         System.out.println(p1.name+" has $"+p1.money);
         System.out.println("Computer has $"+computer.money);
       }
       //when player1's win
       else{
-        p1.money = p1.money-b;
-        computer.money = computer.money+b;
-        System.out.println("Computer got $"+b);
-        System.out.println(p1.name+" loses $"+b);
+        p1.money = p1.money-p1.betMoney;
+        computer.money = computer.money+p1.betMoney;
+        System.out.println("Computer got $"+p1.betMoney);
+        System.out.println(p1.name+" loses $"+p1.betMoney);
         System.out.println("");
         System.out.println(p1.name+" has $"+(p1.money));
         System.out.println("Computer has $"+(computer.money));
       }
-      //when player2's win
+      //when computer's win
       
       System.out.println("Do you want to play again? (Y/N)");
       Scanner input = new Scanner(System.in);
@@ -82,9 +89,10 @@ public class BlackJack{
         }
       }
       //when you want to play again
+      
       else if(a.equals("N") || a.equals("n")){
         System.out.println("See you later!");
-        break;   
+        break;
       }
       //when you don't want to play again
     }
@@ -92,31 +100,99 @@ public class BlackJack{
   
   
   
-  public static int play_human(Player p){   
+  public static int play_human(Player p, Player computer){
+    Card deck = new Card ();   
     Scanner in = new Scanner(System.in);
-    int human_card1 = (int)(Math.random()*11)+1;
-    int human_card2 = (int)(Math.random()*11)+1;
+    int human_card1 = deck.cardPoint;
+    String humanCard1 = deck.cardShape+deck.cardPoint;
+    deck = new Card ();
+    int human_card2 = deck.cardPoint;
+    String humanCard2 = deck.cardShape+deck.cardPoint;
     int human_total = human_card1 + human_card2;
     System.out.print(p.name);
     System.out.println(" player got");
-    System.out.println(human_card1+" and "+human_card2);
+    System.out.println(humanCard1+" and "+humanCard2);
     System.out.print(p.name);
     System.out.println(" player got " + human_total); 
     if(human_total > 21){
       return human_total;
     }   
+    //receive the two card
+    
+    
+    System.out.println("Do you want to bet more? (Y/N)");    
+    String q = in.nextLine();
+    if(q.equals("Y") || q.equals("y")){
+      while(p.money>0 && computer.money>0){     
+        System.out.println("");   
+        System.out.println(p.name+" has $"+p.money);    
+        System.out.println(computer.name+" has $"+computer.money);
+        System.out.println("your bet money is $"+p.betMoney);
+        System.out.println(p.name + ", How much will you bet?");
+        int r = in.nextInt();    
+        
+        while(r > (p.money - p.betMoney)){
+          System.out.println("Please bet less than $"+(p.money - p.betMoney));
+          r = in.nextInt(); 
+          if(r <= p.money && r > 0 && r <= (p.money - p.betMoney)){
+            p.betMoney = p.betMoney+r;
+            System.out.println(p.name+" bet $"+p.betMoney);
+            System.out.println("");
+            break;
+          }
+        }
+        
+        while(r > p.money || r <= 0){
+          System.out.println("Please bet less than $"+p.money+" or more than $0");
+          r = in.nextInt(); 
+          if(r <= p.money && r > 0 && r <= (p.money - p.betMoney)){
+            p.betMoney = p.betMoney+r;
+            System.out.println(p.name+" bet $"+p.betMoney);
+            System.out.println("");
+            break;
+          } 
+        }
+        
+        while(r > (computer.money-p.betMoney)){
+          System.out.println("Please bet less than $"+(computer.money-p.betMoney));
+          r = in.nextInt(); 
+          if(r <= (computer.money-p.betMoney)){
+            p.betMoney = p.betMoney+r;
+            System.out.println(p.name+" bet $"+p.betMoney);
+            System.out.println("");
+            break;
+          }
+        }
+        
+        if(r <= p.money && r > 0 && r <= (p.money - p.betMoney)){
+          p.betMoney = p.betMoney+r;
+          System.out.println(p.name+" bet $"+p.betMoney);
+          System.out.println("");  
+        } 
+        break;
+      }
+    }
+    else if(q.equals("N") || q.equals("n")){
+      
+    }
+    //ask the bet more
+    
+    
     System.out.println("Do you want another card (Y/N)");
-    String s = in.nextLine();
+    Scanner input = new Scanner(System.in);
+    String s = input.nextLine();
     while(s.equals("Y") || s.equals("y")){
-      human_total = human_total + (int)(Math.random()*11)+1;
+      deck = new Card ();
+      human_total = human_total + deck.cardPoint;
+      String newCard = deck.cardShape+deck.cardPoint;
       System.out.print(p.name);
-      System.out.println(" player got new card ");
+      System.out.println(" player got new card "+newCard);
       System.out.println("new " + p.name + " total " + human_total);
       if(human_total > 21){
         break;
       }      
       System.out.println("Do you want another card (Y/N)");
-      String x = in.nextLine();
+      String x = input.nextLine();
       if(x.equals("Y") || x.equals("y")){ 
       }else if(x.equals("N") || x.equals("n")){
         break;
@@ -126,24 +202,32 @@ public class BlackJack{
     in.close();
     return human_total;    
   }
+  //player's turn
+  
   
   
   public static int play_computer(){ 
-    int computer_card1 = (int)(Math.random()*11)+1;
-    int computer_card2 = (int)(Math.random()*11)+1; ;
+    Card deck = new Card ();   
+    int computer_card1 = deck.cardPoint;
+    String computerCard1 = deck.cardShape+deck.cardPoint;
+    deck = new Card ();
+    int computer_card2 = deck.cardPoint; 
+    String computerCard2 = deck.cardShape+deck.cardPoint;
     int computer_total = computer_card1 + computer_card2;
     System.out.println("Computer player got");
-    System.out.println(computer_card1+" and "+computer_card2); 
+    System.out.println(computerCard1+" and "+computerCard2); 
     System.out.println("Computer player got " + computer_total); 
     System.out.println("");
     return computer_total; 
   }
+  //computer's turn
   
   
   public static void calculate_winner(int s_total,int computer_total, Player p1) { 
     System.out.print(p1.name);
     System.out.println(" player got " + s_total);
     System.out.println("Computer player got " + computer_total);
+    System.out.println("");
     if(s_total<=21 && computer_total<s_total){
       System.out.print(p1.name);
       System.out.println(" Wins");
@@ -152,6 +236,7 @@ public class BlackJack{
       System.out.println("Computer Wins");
     }  
   }
+  //calculate_winner
 }
 
 
